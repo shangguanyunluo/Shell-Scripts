@@ -11,7 +11,7 @@ cmd_clear="sh /etc/ceph/scripts/clear.sh"
 cmd_stopctdb="systemctl stop ctdb"
 cmd_ctdb="ps -ef | grep ctdb | awk '{print \$2}'| xargs -I {} kill -9 {}"
 cmd_mount="mount | grep f2fs | awk '{print \$3}'"
-cmd_umount="mount | grep nfs4 | awk '{cmd=\"umount \"\$3;system(cmd)}'"
+cmd_umount="mount | grep f2fs | awk '{cmd=\"umount \"\$3;system(cmd)}'"
 var_sshpass=$(rpm -qa sshpass)
 
 if [ -z $var_sshpass ]
@@ -34,19 +34,15 @@ EOF
     echo "-------------------Finished to execute clear.sh------------------"
 
     cmd_mount='mount | grep f2fs | grep -o -E "/Ceph(/\w+)+(-\w+)+"'
-    var=$(sshpass -p lenovo ssh -tt -o 'StrictHostKeyChecking no'  root@${server_ip} ${cmd_mount})
+    sshpass -p lenovo ssh -tt -o 'StrictHostKeyChecking no'  root@${server_ip} ${cmd_mount}
 
 
-    if [ -z ${var[@]} ]
+    if [ $? -eq 1 ]
     then
         echo "There is nothing to clear."
     else
         echo '------------------------------'
-        for i in $var
-        do
-            cmd_umount="umount $i"
-            sshpass -p lenovo ssh -o 'StrictHostKeyChecking no' root@${server_ip} ${cmd_umount}
-        done
+        sshpass -p lenovo ssh -o 'StrictHostKeyChecking no' root@${server_ip} ${cmd_umount}
         echo '===================='
     fi
 done
