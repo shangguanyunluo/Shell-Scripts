@@ -1,18 +1,18 @@
 #!/bin/bash
 
-manage_network_vip='10.100.46.150'
-public_network_vip='10.100.46.150'
+manage_network_vip='192.168.0.10'
+public_network_vip='192.168.0.10'
 controller_public_ip='10.100.46.105'
 controller_name_list=('controller-1' 'controller-2' 'controller-3')
 controller_public_ip_list=('10.100.46.105' '10.100.46.105' '10.100.46.105')
-controller_ip_list=('192.168.0.186' '192.168.0.185' '192.168.0.187')
+controller_ip_list=('192.168.0.195' '192.168.0.194' '192.168.0.193')
 controller_pwd='lenovo'
 
 
 function controller_ssh_without_pwd(){
     sshpass -p ${controller_pwd} ssh -o StrictHostKeyChecking=no root@${controller_public_ip}  "
 hostname
-ssh-keygen -t rsa -N '' -f id_rsa -q;
+ssh-keygen -t rsa -N '' -f .ssh/id_rsa -q;
 echo Generate Public key status:$?;
 
 ssh-copy-id ${controller_ip_list[1]};
@@ -68,7 +68,9 @@ function controller_env_prepare2(){
     echo controller_num_3=$controller_num_3
     #sshpass -p ${controller_pwd} 
     ssh -tt -o StrictHostKeyChecking=no root@${controller_ip_list[$1]}  <<EOF
-hostnamectl set-hostname ${controller_name_list[$1]}  #step2
+hostnamectl set-hostname ${controller_name_list[$1]};  #step2
+hostname;
+mkdir /root/build;
 timedatectl set-timezone Asia/Shanghai;  #step 3l
 echo timedatectl set status:$?;
 #step 4
@@ -102,4 +104,3 @@ function ha_env_prepare(){
 
 #controller_ssh_without_pwd
 ha_env_prepare
-
